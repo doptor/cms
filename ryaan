@@ -1,0 +1,290 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * ╔══════════════════════════════════════════════════════════════╗
+ * ║          RyaanCMS CLI Installer v1.0.0                       ║
+ * ║    Free & Open Source AI-Powered Laravel CMS                 ║
+ * ║    Shared Hosting Compatible · PHP 8.2+ · MySQL              ║
+ * ╚══════════════════════════════════════════════════════════════╝
+ *
+ * Usage:
+ *   php ryaan install          — Full interactive install
+ *   php ryaan install --quick  — Install with defaults
+ *   php ryaan check            — Check system requirements
+ *   php ryaan update           — Update to latest version
+ *   php ryaan key:generate     — Regenerate APP_KEY
+ */
+
+define('RYAAN_VERSION', '1.0.0');
+define('RYAAN_MIN_PHP',  '8.2.0');
+
+class RyaanInstaller
+{
+    private array $colors = [
+        'reset'  => "\033[0m",
+        'bold'   => "\033[1m",
+        'red'    => "\033[31m",
+        'green'  => "\033[32m",
+        'yellow' => "\033[33m",
+        'blue'   => "\033[34m",
+        'purple' => "\033[35m",
+        'cyan'   => "\033[36m",
+        'white'  => "\033[37m",
+    ];
+
+    public function run(array $args): void
+    {
+        $command = $args[1] ?? 'help';
+
+        $this->banner();
+
+        match ($command) {
+            'install' => $this->install(in_array('--quick', $args)),
+            'check'   => $this->checkRequirements(),
+            'update'  => $this->update(),
+            'key:generate' => $this->generateKey(),
+            default   => $this->help(),
+        };
+    }
+
+    private function banner(): void
+    {
+        $this->line('');
+        $this->line($this->color('purple', '  ⚡ RyaanCMS Installer v' . RYAAN_VERSION));
+        $this->line($this->color('cyan',   '  Free & Open Source AI-Powered Laravel CMS'));
+        $this->line('  ' . str_repeat('─', 50));
+        $this->line('');
+    }
+
+    private function install(bool $quick = false): void
+    {
+        $this->info('Starting RyaanCMS installation...');
+        $this->line('');
+
+        // 1. Requirements check
+        $this->step('Checking system requirements');
+        if (!$this->checkRequirements(silent: true)) {
+            $this->error('Requirements not met. Run: php ryaan check');
+            exit(1);
+        }
+        $this->success('Requirements OK');
+
+        // 2. Collect config
+        $config = $quick ? $this->defaultConfig() : $this->promptConfig();
+
+        // 3. Create .env
+        $this->step('Creating .env file');
+        $this->createEnv($config);
+        $this->success('.env created');
+
+        // 4. Generate app key
+        $this->step('Generating application key');
+        $key = $this->generateAppKey();
+        $this->updateEnv('APP_KEY', $key);
+        $this->success("Key: $key");
+
+        // 5. Database setup
+        $this->step('Testing database connection');
+        if ($this->testDatabase($config)) {
+            $this->success('Database connected');
+            $this->step('Running migrations');
+            $this->runCommand('php artisan migrate --force --seed');
+            $this->success('Migrations complete');
+        } else {
+            $this->warn('Database connection failed. Configure .env manually and run: php artisan migrate');
+        }
+
+        // 6. Storage
+        $this->step('Setting up storage');
+        $this->runCommand('php artisan storage:link');
+        $this->setPermissions();
+        $this->success('Storage configured');
+
+        // 7. Optimize
+        $this->step('Optimizing for production');
+        $this->runCommand('php artisan optimize');
+        $this->success('Optimized');
+
+        // Done!
+        $this->line('');
+        $this->line($this->color('green', '  ✅ RyaanCMS installed successfully!'));
+        $this->line('');
+        $this->line("  🌐 URL:      " . $this->color('cyan', $config['APP_URL']));
+        $this->line("  👤 Admin:    " . $this->color('cyan', 'Register at ' . $config['APP_URL'] . '/register'));
+        $this->line("  🔑 API Keys: " . $this->color('cyan', $config['APP_URL'] . '/settings'));
+        $this->line("  📖 Docs:     " . $this->color('cyan', 'https://ryaancms.com/docs'));
+        $this->line('');
+    }
+
+    private function checkRequirements(bool $silent = false): bool
+    {
+        $checks = [
+            'PHP >= 8.2'        => version_compare(PHP_VERSION, RYAAN_MIN_PHP, '>='),
+            'PDO MySQL'         => extension_loaded('pdo_mysql'),
+            'OpenSSL'           => extension_loaded('openssl'),
+            'Fileinfo'          => extension_loaded('fileinfo'),
+            'Mbstring'          => extension_loaded('mbstring'),
+            'Tokenizer'         => extension_loaded('tokenizer'),
+            'cURL'              => extension_loaded('curl'),
+            'JSON'              => extension_loaded('json'),
+            'FTP extension'     => extension_loaded('ftp'),
+            'Writable storage/' => is_writable('storage') || mkdir('storage/app', 0755, true),
+        ];
+
+        $allPassed = true;
+
+        if (!$silent) {
+            $this->line($this->color('bold', '  System Requirements:'));
+            $this->line('');
+        }
+
+        foreach ($checks as $label => $passed) {
+            if (!$passed) $allPassed = false;
+
+            if (!$silent) {
+                $icon   = $passed ? $this->color('green', '  ✓') : $this->color('red', '  ✗');
+                $status = $passed ? $this->color('green', 'OK') : $this->color('red', 'MISSING');
+                $this->line("$icon  $label — $status");
+            }
+        }
+
+        if (!$silent) {
+            $this->line('');
+            $this->line("  PHP Version: " . $this->color('cyan', PHP_VERSION));
+        }
+
+        return $allPassed;
+    }
+
+    private function promptConfig(): array
+    {
+        $this->line($this->color('bold', '  Configuration:'));
+        $this->line('');
+
+        return [
+            'APP_NAME'     => $this->prompt('App Name', 'RyaanCMS'),
+            'APP_URL'      => $this->prompt('App URL', 'http://localhost'),
+            'DB_HOST'      => $this->prompt('DB Host', '127.0.0.1'),
+            'DB_PORT'      => $this->prompt('DB Port', '3306'),
+            'DB_DATABASE'  => $this->prompt('DB Name', 'ryaancms'),
+            'DB_USERNAME'  => $this->prompt('DB Username', 'root'),
+            'DB_PASSWORD'  => $this->prompt('DB Password', ''),
+            'MAIL_HOST'    => $this->prompt('Mail Host (optional)', 'localhost'),
+        ];
+    }
+
+    private function defaultConfig(): array
+    {
+        return [
+            'APP_NAME'    => 'RyaanCMS',
+            'APP_URL'     => 'http://localhost',
+            'DB_HOST'     => '127.0.0.1',
+            'DB_PORT'     => '3306',
+            'DB_DATABASE' => 'ryaancms',
+            'DB_USERNAME' => 'root',
+            'DB_PASSWORD' => '',
+            'MAIL_HOST'   => 'localhost',
+        ];
+    }
+
+    private function createEnv(array $config): void
+    {
+        $template = file_get_contents('.env.example');
+        foreach ($config as $key => $value) {
+            $template = preg_replace("/^{$key}=.*/m", "{$key}={$value}", $template);
+        }
+        $template = str_replace('APP_DEBUG=false', 'APP_DEBUG=false', $template);
+        file_put_contents('.env', $template);
+    }
+
+    private function generateAppKey(): string
+    {
+        return 'base64:' . base64_encode(random_bytes(32));
+    }
+
+    private function generateKey(): void
+    {
+        $key = $this->generateAppKey();
+        $this->updateEnv('APP_KEY', $key);
+        $this->success("New key: $key");
+    }
+
+    private function updateEnv(string $key, string $value): void
+    {
+        $env = file_get_contents('.env');
+        $env = preg_replace("/^{$key}=.*/m", "{$key}={$value}", $env);
+        file_put_contents('.env', $env);
+    }
+
+    private function testDatabase(array $config): bool
+    {
+        try {
+            $dsn = "mysql:host={$config['DB_HOST']};port={$config['DB_PORT']};dbname={$config['DB_DATABASE']}";
+            new PDO($dsn, $config['DB_USERNAME'], $config['DB_PASSWORD']);
+            return true;
+        } catch (\Exception) {
+            return false;
+        }
+    }
+
+    private function setPermissions(): void
+    {
+        $dirs = ['storage', 'storage/app', 'storage/framework', 'storage/logs', 'bootstrap/cache'];
+        foreach ($dirs as $dir) {
+            if (is_dir($dir)) chmod($dir, 0755);
+        }
+    }
+
+    private function runCommand(string $cmd): void
+    {
+        exec($cmd . ' 2>&1', $output);
+    }
+
+    private function update(): void
+    {
+        $this->info('Updating RyaanCMS...');
+        $this->runCommand('git pull origin main');
+        $this->runCommand('composer install --no-dev --optimize-autoloader');
+        $this->runCommand('php artisan migrate --force');
+        $this->runCommand('php artisan optimize:clear && php artisan optimize');
+        $this->success('Updated to latest version!');
+    }
+
+    private function help(): void
+    {
+        $this->line($this->color('bold', '  Available Commands:'));
+        $this->line('');
+        $this->line('  php ryaan install          Full interactive installation');
+        $this->line('  php ryaan install --quick  Install with default settings');
+        $this->line('  php ryaan check            Check system requirements');
+        $this->line('  php ryaan update           Update RyaanCMS to latest');
+        $this->line('  php ryaan key:generate     Regenerate APP_KEY');
+        $this->line('');
+    }
+
+    // ─── Output helpers ───────────────────────────────────────────
+
+    private function color(string $name, string $text): string
+    {
+        return ($this->colors[$name] ?? '') . $text . $this->colors['reset'];
+    }
+
+    private function line(string $text): void   { echo $text . PHP_EOL; }
+    private function info(string $text): void   { $this->line('  ' . $this->color('cyan',   "ℹ $text")); }
+    private function success(string $text): void{ $this->line('  ' . $this->color('green',  "✓ $text")); }
+    private function warn(string $text): void   { $this->line('  ' . $this->color('yellow', "⚠ $text")); }
+    private function error(string $text): void  { $this->line('  ' . $this->color('red',    "✗ $text")); }
+    private function step(string $text): void   { $this->line('  ' . $this->color('purple', "→ $text...")); }
+
+    private function prompt(string $label, string $default = ''): string
+    {
+        $display = $default ? " [$default]" : '';
+        echo "  {$label}{$display}: ";
+        $input = trim(fgets(STDIN));
+        return $input ?: $default;
+    }
+}
+
+// Run
+(new RyaanInstaller())->run($argv);

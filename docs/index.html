@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RyaanCMS Documentation</title>
+    <meta name="description" content="Complete documentation for RyaanCMS — Free AI-Powered Laravel CMS">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Instrument+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{display:['Syne','sans-serif'],mono:['DM Mono','monospace'],sans:['Instrument Sans','sans-serif']}}}}</script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        body{font-family:'Instrument Sans',sans-serif}
+        .prose h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:#fff;margin:2.5rem 0 1rem;padding-bottom:0.5rem;border-bottom:1px solid rgba(255,255,255,0.08)}
+        .prose h3{font-family:'Syne',sans-serif;font-weight:700;font-size:1.125rem;color:#e0e0f0;margin:1.75rem 0 0.75rem}
+        .prose p{color:#9999bb;line-height:1.8;margin-bottom:1rem;font-size:0.9375rem}
+        .prose ul{margin:1rem 0 1rem 1.5rem;space-y:0.5rem}
+        .prose li{color:#9999bb;line-height:1.7;margin-bottom:0.375rem;list-style:disc}
+        .prose li::marker{color:#6c63ff}
+        .prose code{font-family:'DM Mono',monospace;background:#1a1a24;border:1px solid #222232;padding:0.15em 0.4em;border-radius:0.375rem;font-size:0.8125rem;color:#a8b3cf}
+        .prose pre{background:#0d0d14;border:1px solid #222232;border-radius:0.75rem;padding:1.25rem;margin:1.25rem 0;overflow-x:auto}
+        .prose pre code{background:none;border:none;padding:0;font-size:0.8125rem;color:#a8b3cf;line-height:1.7}
+        .prose strong{color:#fff;font-weight:600}
+        .prose a{color:#6c63ff;text-decoration:none}
+        .prose a:hover{text-decoration:underline}
+        .prose table{width:100%;border-collapse:collapse;margin:1.25rem 0;font-size:0.875rem}
+        .prose th{background:#1a1a24;color:#9999bb;font-weight:600;text-align:left;padding:0.75rem 1rem;border-bottom:1px solid #222232}
+        .prose td{padding:0.75rem 1rem;border-bottom:1px solid #111120;color:#9999bb}
+        .prose tr:hover td{background:rgba(255,255,255,0.02)}
+        .nav-link{display:flex;align-items:center;gap:0.5rem;padding:0.375rem 0.75rem;border-radius:0.5rem;font-size:0.8125rem;color:#6b6b8a;transition:all 0.15s;cursor:pointer}
+        .nav-link:hover,.nav-link.active{color:#fff;background:rgba(108,99,255,0.12)}
+        .nav-link.active{color:#6c63ff}
+        .callout{border-radius:0.75rem;padding:1rem 1.25rem;margin:1.25rem 0;border-left:3px solid}
+        .callout-info{background:rgba(108,99,255,0.08);border-color:#6c63ff}
+        .callout-warn{background:rgba(245,158,11,0.08);border-color:#f59e0b}
+        .callout-tip{background:rgba(16,185,129,0.08);border-color:#10b981}
+        ::-webkit-scrollbar{width:5px;height:5px}
+        ::-webkit-scrollbar-thumb{background:#222232;border-radius:4px}
+    </style>
+</head>
+<body class="bg-[#0a0a0f] text-gray-100 min-h-screen" x-data="docs()">
+
+    {{-- TOP NAV --}}
+    <header class="fixed top-0 left-0 right-0 z-50 h-14 bg-[#0a0a0f]/90 backdrop-blur-xl border-b border-white/5 flex items-center px-6 gap-4">
+        <a href="/" class="flex items-center gap-2.5 mr-6">
+            <div class="w-7 h-7 bg-gradient-to-br from-[#6c63ff] to-[#00d4aa] rounded-lg flex items-center justify-center text-sm">⚡</div>
+            <span class="font-display font-bold text-lg text-white">Ryaan<span class="text-[#00d4aa]">CMS</span></span>
+            <span class="text-xs text-gray-600 border border-white/10 px-2 py-0.5 rounded-full">Docs</span>
+        </a>
+        <div class="flex-1 max-w-sm flex items-center gap-2 bg-[#1a1a24] border border-white/8 rounded-xl px-3 py-2">
+            <span class="text-gray-600">🔍</span>
+            <input x-model="search" type="text" placeholder="Search docs..."
+                class="flex-1 bg-transparent text-sm text-gray-300 placeholder-gray-600 outline-none"/>
+        </div>
+        <div class="ml-auto flex gap-3">
+            <a href="https://github.com" class="text-sm text-gray-400 hover:text-white transition-colors flex items-center gap-1.5">⭐ GitHub</a>
+            <a href="/dashboard" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-[#6c63ff] to-purple-600 text-white text-sm font-semibold hover:opacity-90 transition-all">Dashboard →</a>
+        </div>
+    </header>
+
+    <div class="flex pt-14">
+
+        {{-- SIDEBAR --}}
+        <aside class="w-64 fixed left-0 top-14 bottom-0 overflow-y-auto bg-[#0a0a0f] border-r border-white/5 py-6 px-3">
+            @php
+            $sections = [
+                'Getting Started' => [
+                    ['introduction',   '👋 Introduction'],
+                    ['installation',   '📦 Installation'],
+                    ['shared-hosting', '🌐 Shared Hosting'],
+                    ['configuration',  '⚙️ Configuration'],
+                    ['quick-start',    '🚀 Quick Start'],
+                ],
+                'AI Features' => [
+                    ['ai-api-keys',  '🔑 API Keys Setup'],
+                    ['ai-builder',   '🤖 AI Builder'],
+                    ['ai-routing',   '🔀 Smart Routing'],
+                    ['ai-commands',  '⚡ AI Commands'],
+                ],
+                'Core Features' => [
+                    ['projects',     '📁 Projects'],
+                    ['page-builder', '🎨 Page Builder'],
+                    ['deploy',       '🚀 Deployment'],
+                    ['marketplace',  '🛒 Marketplace'],
+                    ['seo',          '🔍 SEO Manager'],
+                    ['analytics',    '📈 Analytics'],
+                ],
+                'Security' => [
+                    ['authentication','🔐 Authentication'],
+                    ['two-factor',    '🛡 Two-Factor Auth'],
+                    ['api-security',  '🔒 API Security'],
+                    ['permissions',   '👥 Permissions'],
+                ],
+                'Advanced' => [
+                    ['white-label',   '🏷 White-Label'],
+                    ['stripe',        '💳 Stripe Payments'],
+                    ['pwa',           '📱 PWA Setup'],
+                    ['cli',           '⚡ CLI Installer'],
+                    ['hooks',         '🪝 Hooks & Events'],
+                ],
+                'Reference' => [
+                    ['env',           '📄 .env Reference'],
+                    ['artisan',       '🔧 Artisan Commands'],
+                    ['changelog',     '📋 Changelog'],
+                    ['contributing',  '🤝 Contributing'],
+                ],
+            ];
+            @endphp
+
+            @foreach($sections as $title => $items)
+            <div class="mb-5">
+                <div class="px-3 mb-1.5 text-xs font-bold uppercase tracking-widest text-gray-600">{{ $title }}</div>
+                @foreach($items as [$id,$label])
+                <a class="nav-link" :class="activeSection === '{{ $id }}' ? 'active' : ''" @click="activeSection = '{{ $id }}'">
+                    {{ $label }}
+                </a>
+                @endforeach
+            </div>
+            @endforeach
+        </aside>
+
+        {{-- MAIN CONTENT --}}
+        <main class="ml-64 flex-1 max-w-4xl mx-auto px-8 py-10 prose">
+
+            {{-- INTRODUCTION --}}
+            <div x-show="activeSection === 'introduction'">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#6c63ff]/10 border border-[#6c63ff]/20 text-[#6c63ff] text-xs mb-6">v1.0.0 · MIT License · Free & Open Source</div>
+                <h1 class="font-display font-black text-4xl text-white mb-4">Welcome to RyaanCMS</h1>
+                <p>RyaanCMS is the world's first <strong>free, open-source AI-powered Laravel CMS</strong> that runs on shared hosting. Build complex web applications — e-commerce stores, SaaS platforms, blogs, portfolios — just by typing a prompt.</p>
+                <div class="callout callout-tip"><strong class="text-emerald-400">✅ No VPS required.</strong> RyaanCMS runs on any cPanel shared hosting with PHP 8.2+ and MySQL — which you likely already have.</div>
+                <h2>What makes RyaanCMS different?</h2>
+                <table><thead><tr><th>Feature</th><th>WordPress</th><th>Bolt.new</th><th>RyaanCMS</th></tr></thead>
+                <tbody>
+                    <tr><td>AI App Builder</td><td>❌</td><td>✅</td><td>✅</td></tr>
+                    <tr><td>Shared Hosting</td><td>✅</td><td>❌</td><td>✅</td></tr>
+                    <tr><td>Free & Open Source</td><td>✅</td><td>❌</td><td>✅</td></tr>
+                    <tr><td>Bring Your Own API Key</td><td>❌</td><td>❌</td><td>✅</td></tr>
+                    <tr><td>One-Click FTP Deploy</td><td>❌</td><td>❌</td><td>✅</td></tr>
+                    <tr><td>Marketplace</td><td>✅</td><td>❌</td><td>✅</td></tr>
+                </tbody></table>
+                <h2>Core Architecture</h2>
+                <ul>
+                    <li><strong>Backend:</strong> Laravel 11 · PHP 8.2+</li>
+                    <li><strong>Database:</strong> MySQL (free with cPanel)</li>
+                    <li><strong>AI:</strong> Claude Sonnet 4 + DeepSeek V3 (BYOK)</li>
+                    <li><strong>Frontend:</strong> Tailwind CSS CDN + Alpine.js (no npm build)</li>
+                    <li><strong>Deploy:</strong> FTP auto-deploy to shared hosting</li>
+                </ul>
+            </div>
+
+            {{-- INSTALLATION --}}
+            <div x-show="activeSection === 'installation'" x-cloak>
+                <h1 class="font-display font-black text-4xl text-white mb-4">Installation</h1>
+                <h2>Requirements</h2>
+                <ul>
+                    <li>PHP 8.2 or higher</li>
+                    <li>MySQL 5.7+ / MariaDB 10.3+</li>
+                    <li>Composer 2.x</li>
+                    <li>PHP extensions: pdo_mysql, openssl, ftp, mbstring, curl</li>
+                </ul>
+                <h2>One-Line CLI Install</h2>
+                <pre><code>curl -fsSL https://ryaancms.com/install | php</code></pre>
+                <h2>Manual Install</h2>
+                <pre><code># 1. Clone the repository
+git clone https://github.com/ryaancms/ryaancms.git
+cd ryaancms
+
+# 2. Install PHP dependencies
+composer install --optimize-autoloader --no-dev
+
+# 3. Configure environment
+cp .env.example .env
+php artisan key:generate
+
+# 4. Edit .env with your database credentials
+nano .env
+
+# 5. Run database migrations
+php artisan migrate --seed
+
+# 6. Set permissions & create storage link
+chmod -R 755 storage bootstrap/cache
+php artisan storage:link
+
+# 7. Start development server
+php artisan serve</code></pre>
+                <div class="callout callout-info">
+                    <strong class="text-[#6c63ff]">ℹ️ Tip:</strong> Visit <code>http://localhost:8000</code> then go to <strong>Settings → API Keys</strong> to add your Claude or DeepSeek key before building your first project.
+                </div>
+            </div>
+
+            {{-- SHARED HOSTING --}}
+            <div x-show="activeSection === 'shared-hosting'" x-cloak>
+                <h1 class="font-display font-black text-4xl text-white mb-4">Shared Hosting Setup</h1>
+                <p>RyaanCMS is designed to run on any cPanel shared hosting. This guide covers Hostinger, Bluehost, Namecheap, and similar providers.</p>
+                <h2>Step 1 — Upload Files</h2>
+                <p>Upload all files <strong>except</strong> the <code>public/</code> folder to a directory like <code>laravel/</code> in your home directory. Upload the <em>contents</em> of <code>public/</code> directly to <code>public_html/</code>.</p>
+                <h2>Step 2 — Fix the index.php paths</h2>
+                <pre><code>// public_html/index.php — update both paths:
+require __DIR__.'/../laravel/vendor/autoload.php';
+$app = require_once __DIR__.'/../laravel/bootstrap/app.php';</code></pre>
+                <h2>Step 3 — Database</h2>
+                <p>In cPanel → MySQL Databases: create a database, create a user, assign ALL privileges, then update your <code>.env</code>:</p>
+                <pre><code>DB_HOST=127.0.0.1
+DB_DATABASE=username_dbname
+DB_USERNAME=username_user
+DB_PASSWORD=yourpassword</code></pre>
+                <h2>Step 4 — Run Migrations</h2>
+                <p>Use cPanel Terminal (if available) or a web-based Artisan runner:</p>
+                <pre><code>php artisan migrate --force --seed</code></pre>
+                <div class="callout callout-warn"><strong class="text-amber-400">⚠️ PHP Version:</strong> Make sure PHP 8.2+ is selected in cPanel → MultiPHP Manager for your domain.</div>
+            </div>
+
+            {{-- AI API KEYS --}}
+            <div x-show="activeSection === 'ai-api-keys'" x-cloak>
+                <h1 class="font-display font-black text-4xl text-white mb-4">AI API Keys Setup</h1>
+                <p>RyaanCMS supports Claude (Anthropic) and DeepSeek. You bring your own API keys — they are stored encrypted with AES-256 and never leave your server.</p>
+                <h2>Getting a Claude API Key</h2>
+                <ul>
+                    <li>Go to <a href="https://console.anthropic.com">console.anthropic.com</a></li>
+                    <li>Create an account and navigate to <strong>API Keys</strong></li>
+                    <li>Click <strong>Create Key</strong> and copy it (starts with <code>sk-ant-api03-</code>)</li>
+                    <li>Paste it in RyaanCMS → Settings → API Keys</li>
+                </ul>
+                <h2>Getting a DeepSeek API Key</h2>
+                <ul>
+                    <li>Go to <a href="https://platform.deepseek.com">platform.deepseek.com</a></li>
+                    <li>Register — you get <strong>5 million free tokens</strong> on signup</li>
+                    <li>Go to API Keys → Create new key</li>
+                    <li>Paste it in RyaanCMS → Settings → API Keys</li>
+                </ul>
+                <h2>Smart Routing (Auto Mode)</h2>
+                <p>When set to <strong>Auto</strong>, RyaanCMS routes requests intelligently:</p>
+                <ul>
+                    <li><strong>DeepSeek V3</strong> — Simple tasks, short prompts, content generation (~80% of requests)</li>
+                    <li><strong>Claude Sonnet</strong> — Complex code, security, architecture, long prompts (~20%)</li>
+                </ul>
+                <p>This reduces your AI costs by up to <strong>80%</strong> compared to using Claude for everything.</p>
+                <h2>Cost Estimates (per user/month)</h2>
+                <table><thead><tr><th>Usage Level</th><th>Requests</th><th>Claude Only</th><th>Auto Routing</th></tr></thead>
+                <tbody>
+                    <tr><td>Light</td><td>50</td><td>~$1.50</td><td>~$0.25</td></tr>
+                    <tr><td>Medium</td><td>300</td><td>~$9.00</td><td>~$2.00</td></tr>
+                    <tr><td>Heavy</td><td>1,000</td><td>~$30.00</td><td>~$7.00</td></tr>
+                </tbody></table>
+            </div>
+
+            {{-- WHITE LABEL --}}
+            <div x-show="activeSection === 'white-label'" x-cloak>
+                <h1 class="font-display font-black text-4xl text-white mb-4">White-Label Mode</h1>
+                <p>Agencies can rebrand RyaanCMS with their own name, logo, colors, and custom domain — completely removing all RyaanCMS branding.</p>
+                <h2>Enable White-Label</h2>
+                <pre><code># .env
+WHITELABEL_ENABLED=true
+WHITELABEL_NAME="AgencyCMS"
+WHITELABEL_TAGLINE="Your Agency's CMS Platform"
+WHITELABEL_LOGO="https://youragency.com/logo.png"
+WHITELABEL_COLOR="#e74c3c"
+WHITELABEL_COLOR2="#c0392b"
+WHITELABEL_HIDE=true</code></pre>
+                <h2>Multi-tenant / Per-Domain</h2>
+                <p>Store white-label configs per domain in the <code>whitelabel_configs</code> database table:</p>
+                <pre><code>INSERT INTO whitelabel_configs (domain, config, is_active) VALUES (
+  'cms.clientsite.com',
+  '{"name":"ClientCMS","color":"#3498db","logo":"https://...","hide_branding":true}',
+  1
+);</code></pre>
+            </div>
+
+            {{-- CLI --}}
+            <div x-show="activeSection === 'cli'" x-cloak>
+                <h1 class="font-display font-black text-4xl text-white mb-4">CLI Installer</h1>
+                <p>RyaanCMS ships with a PHP CLI installer that makes setup on shared hosting simple.</p>
+                <h2>Available Commands</h2>
+                <pre><code>php ryaan install          # Full interactive installation
+php ryaan install --quick  # Install with default settings
+php ryaan check            # Check system requirements
+php ryaan update           # Update to latest version
+php ryaan key:generate     # Regenerate APP_KEY</code></pre>
+                <h2>Interactive Install</h2>
+                <pre><code>$ php ryaan install
+
+  ⚡ RyaanCMS Installer v1.0.0
+  Free & Open Source AI-Powered Laravel CMS
+  ──────────────────────────────────────────────────
+
+  → Checking system requirements...
+  ✓ Requirements OK
+
+  App Name [RyaanCMS]: MyApp
+  App URL [http://localhost]: https://myapp.com
+  DB Name [ryaancms]: myapp_db
+  DB Username [root]: myapp_user
+  DB Password: ••••••••
+
+  → Creating .env file... ✓
+  → Generating application key... ✓
+  → Running migrations... ✓
+  → Setting up storage... ✓
+  → Optimizing... ✓
+
+  ✅ RyaanCMS installed successfully!
+
+  🌐 URL:      https://myapp.com
+  👤 Admin:    Register at https://myapp.com/register
+  🔑 API Keys: https://myapp.com/settings</code></pre>
+            </div>
+
+            {{-- CHANGELOG --}}
+            <div x-show="activeSection === 'changelog'" x-cloak>
+                <h1 class="font-display font-black text-4xl text-white mb-4">Changelog</h1>
+                <h2>v1.1.0 — March 2026</h2>
+                <ul>
+                    <li>✅ Deploy View with live FTP progress</li>
+                    <li>✅ Projects list with grid/list toggle</li>
+                    <li>✅ Two-Factor Authentication (TOTP)</li>
+                    <li>✅ Email templates (Welcome, Reset, Deploy)</li>
+                    <li>✅ PWA support with service worker</li>
+                    <li>✅ White-label mode (per-domain config)</li>
+                    <li>✅ CLI Installer (<code>php ryaan install</code>)</li>
+                    <li>✅ Stripe marketplace payments (70/30 split)</li>
+                    <li>✅ Analytics dashboard</li>
+                    <li>✅ Drag & drop page builder</li>
+                    <li>✅ GitHub CI/CD workflow</li>
+                </ul>
+                <h2>v1.0.0 — February 2026</h2>
+                <ul>
+                    <li>✅ Initial release</li>
+                    <li>✅ Claude + DeepSeek BYOK support</li>
+                    <li>✅ Smart AI routing (auto mode)</li>
+                    <li>✅ FTP auto-deploy to shared hosting</li>
+                    <li>✅ Marketplace with categories</li>
+                    <li>✅ SEO manager with AI meta generator</li>
+                    <li>✅ Admin panel</li>
+                    <li>✅ AES-256 API key encryption</li>
+                </ul>
+                <h2>Roadmap</h2>
+                <ul>
+                    <li>🔜 v1.2 — Visual component editor</li>
+                    <li>🔜 v1.2 — Multi-language support (i18n)</li>
+                    <li>🔜 v1.3 — Mobile app (React Native)</li>
+                    <li>🔜 v2.0 — RyaanCMS Cloud (hosted option)</li>
+                </ul>
+            </div>
+
+            {{-- Default: show intro for unknown sections --}}
+            <div x-show="!['introduction','installation','shared-hosting','configuration','quick-start','ai-api-keys','ai-builder','ai-routing','ai-commands','projects','page-builder','deploy','marketplace','seo','analytics','authentication','two-factor','api-security','permissions','white-label','stripe','pwa','cli','hooks','env','artisan','changelog','contributing'].includes(activeSection)" x-cloak>
+                <div class="text-center py-20 text-gray-600">
+                    <div class="text-5xl mb-4">📄</div>
+                    <h2 class="font-display font-bold text-2xl text-white mb-2">Coming Soon</h2>
+                    <p>This section is being written. Check back soon!</p>
+                </div>
+            </div>
+
+        </main>
+
+        {{-- RIGHT TOC --}}
+        <div class="w-52 fixed right-0 top-14 bottom-0 overflow-y-auto py-6 px-4 hidden xl:block">
+            <div class="text-xs font-bold uppercase tracking-widest text-gray-600 mb-3">On this page</div>
+            <div class="space-y-1 text-xs text-gray-500" id="toc">
+                <a href="#" class="block hover:text-white transition-colors">Overview</a>
+                <a href="#" class="block hover:text-white transition-colors pl-3">Installation</a>
+                <a href="#" class="block hover:text-white transition-colors pl-3">Configuration</a>
+                <a href="#" class="block hover:text-white transition-colors">Next Steps</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function docs() {
+        return {
+            activeSection: 'introduction',
+            search: '',
+        }
+    }
+    </script>
+</body>
+</html>
